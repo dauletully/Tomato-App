@@ -1,14 +1,13 @@
 import UIKit
 import SnapKit
 
+var isWorkTime = true
 class ViewController: UIViewController {
 
-    private lazy var startTime = 25
-    private lazy var stopTime = 10
 
     //MARK: - UI elements
     private lazy var timer = Timer()
-    private lazy var time = startTime {
+    private lazy var time = 25 {
         didSet {
             currentTimeLabel.text = "\(time)"
         }
@@ -25,6 +24,7 @@ class ViewController: UIViewController {
     private lazy var startStopButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(UIImage(named: "play"), for: .normal)
+        button.tintColor = .green
         button.addTarget(self, action: #selector(touched), for: .touchUpInside)
 
         return button
@@ -36,27 +36,42 @@ class ViewController: UIViewController {
         setupConstraints()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
+    private func runTimer(){
         timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(tick), userInfo: nil, repeats: true)
     }
 
     //MARK: - Target Functions
     @objc private func touched() {
-        if startStopButton.currentImage == UIImage(named: "play") {
+        if startStopButton.currentImage == UIImage(named: "play"){
             startStopButton.setImage(UIImage(named: "pause"), for: .normal)
+            runTimer()
         } else {
             startStopButton.setImage(UIImage(named: "play"), for: .normal)
+            timer.invalidate()
         }
     }
 
     @objc private func tick(){
-        if time == 0{
+        if time == 0 {
             timer.invalidate()
+            if isWorkTime {
+                isWorkTime = false
+                time = 10
+                startStopButton.tintColor = .red
+                touched()
+            } else {
+                isWorkTime = true
+                time = 25
+                startStopButton.tintColor = .green
+                touched()
+
+            }
         }
+        else {
             self.time -= 1
+        }
     }
+
 
     //MARK: - Setup Functions
     private func setupView(){
